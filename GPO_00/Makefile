@@ -1,1 +1,0 @@
-/media/HDD/Downloads/pub/openGL_LAB_VS13/Makefile
