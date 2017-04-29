@@ -3,7 +3,7 @@ CC_FLAGS = -w
 LD_FLAGS = -L../glsdk/freeglut/lib -lfreeglutD -L../glsdk/glfw/library -lglfwD -L../glsdk/glutil/lib -lglutilD -L../glsdk/glload/lib -lglloadD -L../glsdk/glimg/lib -lglimgD -L../glsdk/glmesh/lib -lglmeshD -lGL -lGLU -lm -lX11 -ldl -lXext -lz
 INCLUDE_FLAGS = -I ../glsdk/glfw/include/ -I ../glsdk/glload/include/  -I ../glsdk/glm/
 
-EXEC = run
+EXEC = gpo.app
 SOURCES = $(wildcard *.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 

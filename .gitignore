@@ -27,3 +27,16 @@
 *.exe
 *.out
 *.app
+
+# GLSDK
+glsdk/**/Makefile
+glsdk/**/obj/
+glsdk/**/progs/
+glsdk/**/Debug/
+glsdk/**/.deps/
+glsdk/freeglut/config.h
+glsdk/freeglut/config.log
+glsdk/freeglut/config.status
+glsdk/freeglut/libtool
+glsdk/freeglut/stamp-h1
+
