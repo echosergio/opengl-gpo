@@ -99,9 +99,14 @@ void render_scene()
 
 	///////// Actializaciuon matrices M, V, P  /////////
 
+	// Triángulo 1
 	mat4 P, V, M, T, R, S;
-	T = translate(3 * sin(tt), 3 * cos(tt), 0.0f);
-	M = T;
+	T = translate(0.0f,
+				 (float)(2.0 * sin((3.14*tt)/5.0)),
+				 (float)(2.0 * cos((3.14*tt)/5.0)));
+
+	R = glm::rotate(50.0f*tt,vec3(1,0,0));
+	M = T * R;
 	P = perspective(fov, aspect, 0.5f, 20.0f); // 40 FOV,  4:3 ,  Znear=0.5, Zfar=20
 	V = lookAt(pos_obs, target, up);		   // Pos camara, Lookat, head up
 
@@ -111,10 +116,34 @@ void render_scene()
 	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
 	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
 
-	M = translate(0.0f, 0.0f, 3 * cos(tt));
+	// Triángulo 2
+	T = translate(0.0f,
+				 (float)(2.0 * sin(((3.14*tt)/5.0)-((2.0*3.14)/3.0))),
+				 (float)(2.0 * cos(((3.14*tt)/5.0)-((2.0*3.14)/3.0))));
+
+	R = glm::rotate(50.0f*tt,vec3(0,1,0));
+	M = T * R;
+
 	Q = P * V * M;
 	transfer_mat4("MVP", Q);
-	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv);
+
+	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
+	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
+
+	// Triángulo 3
+	T = translate(0.0f,
+				  (float)(2.0 * sin(((3.14*tt)/5.0)-((4.0*3.14)/3.0))),
+				  (float)(2.0 * cos(((3.14*tt)/5.0)-((4.0*3.14)/3.0))));
+	R = glm::rotate(50.0f*tt,vec3(0,0,1));
+	M = T * R;
+
+	Q = P * V * M;
+	transfer_mat4("MVP", Q);
+
+	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
+	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
+
+
 												 // glDrawArrays(GL_POINTS, 0, 3);
 	glBindVertexArray(0);
 
