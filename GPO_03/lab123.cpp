@@ -110,6 +110,11 @@ void render_scene()
 
 	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
 	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
+
+	M = translate(0.0f, 0.0f, 3 * cos(tt));
+	Q = P * V * M;
+	transfer_mat4("MVP", Q);
+	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv);
 												 // glDrawArrays(GL_POINTS, 0, 3);
 	glBindVertexArray(0);
 
