@@ -101,22 +101,35 @@ void render_scene()
 
 	mat4 P, V, M, T, R, S;
 	T = translate(3 * sin(tt), 3 * cos(tt), 0.0f);
-	M = T;
+	R = glm::rotate(80.0f*tt, glm::vec3(1.0f, 0.0f, 0.0f));
+	S = glm::scale(glm::vec3(1.0f, 0.5f, 1.5f));
+
 	P = perspective(fov, aspect, 0.5f, 20.0f); // 40 FOV,  4:3 ,  Znear=0.5, Zfar=20
 	V = lookAt(pos_obs, target, up);		   // Pos camara, Lookat, head up
 
+	M = T * R * S;
 	mat4 Q = P * V * M;
 	transfer_mat4("MVP", Q);
 
 	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
 	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
 
-	M = translate(0.0f, 0.0f, 3 * cos(tt));
+	M = S * R * T;
 	Q = P * V * M;
 	transfer_mat4("MVP", Q);
-	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv);
-												 // glDrawArrays(GL_POINTS, 0, 3);
+
+	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
+	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
+
+	M = R * T * S;
+	Q = P * V * M;
+	transfer_mat4("MVP", Q);
+
+	glBindVertexArray(triangulo.VAO);			 // Activamos VAO asociado al objeto
+	glDrawArrays(GL_TRIANGLES, 0, triangulo.Nv); // Orden de dibujar (Nv vertices)
+
 	glBindVertexArray(0);
+
 
 	////////////////////////////////////////////////////////
 
