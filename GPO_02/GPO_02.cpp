@@ -100,7 +100,7 @@ void render_scene()
 	///////// Actializaciuon matrices M, V, P  /////////
 
 	mat4 P, V, M, T, R, S;
-	T = translate(0.0f, 0.0f, 3 * sin(tt));
+	T = translate(3 * sin(tt), 3 * cos(tt), 0.0f);
 	M = T;
 	P = perspective(fov, aspect, 0.5f, 20.0f); // 40 FOV,  4:3 ,  Znear=0.5, Zfar=20
 	V = lookAt(pos_obs, target, up);		   // Pos camara, Lookat, head up
