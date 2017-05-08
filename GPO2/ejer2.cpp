@@ -79,7 +79,6 @@ objeto crear_cubo(void)
 						  1, 6, 2,
 						  2, 6, 7,
 						  2, 7, 3, };
-						  //3, 7, 2, };
 
 	obj.tipo_indice = GL_UNSIGNED_BYTE;
 	obj.Nv = 8;
@@ -138,9 +137,11 @@ void dibujar_indexado(objeto obj)
 void init_scene()  
 {
   obj1=crear_cubo();  // Datos del objeto, mandar a GPU
+  obj2=crear_cubo();
   prog=LinkShaders(vertex_prog,fragment_prog); // Compile shaders, crear programa a usar, Mandar a GPU
   glUseProgram(prog);    // Indicamos que programa vamos a usar 
 
+  glEnable(GL_DEPTH_TEST);
 }
 
 
@@ -154,6 +155,9 @@ vec3 up= vec3(0,0,1);
 // Actualizar escena: cambiar posici�n objetos, nuevos objetros, posici�n c�mara, luces, etc.
 void render_scene()
 {
+	glClearColor(0.0f, 0.0f, 0.0f, 0.0f);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
 	FrameCount++;
 	float tt = glutGet(GLUT_ELAPSED_TIME)/1000.0f;  // Tiempo en segundos
 
@@ -165,12 +169,26 @@ void render_scene()
 	mat4 P = perspective(40.0f, 4.0f / 3.0f, 0.1f, 20.0f);  //40� Y-FOV,  4:3 ,  Znear=0.1, Zfar=20
 	mat4 V = lookAt(pos_obs, target, up );  // Pos camara, Lookat, head up
 	mat4 M,T,R,S;
-	
+
 	R = glm::rotate(30.0f*tt,vec3(0,0,1));
 	M = mat4(1.0f) * R;	
 
 	transfer_mat4("MVP",P*V*M);
     dibujar_indexado(obj1);
+
+	// trayectoria de r=1.5 y 1 vuelta cada 6 segundos
+	T = translate((float)(1.5 * sin((3.14*tt)/6.0)),
+ 				  (float)(1.5 * cos((3.14*tt)/6.0)),
+				   0.0f);
+	// Escalado
+	S = glm::scale(0.8f, 0.4f ,0.2f);
+
+	// Rotacion 60º/segundos en el vector (1,0,1)
+	R = glm::rotate(60.0f*tt,vec3(1,0,1));
+	M = T * S * R;	
+
+	transfer_mat4("MVP",P*V*M);
+    dibujar_indexado(obj2);
 
 	////////////////////////////////////////////////////////
 
@@ -279,8 +297,8 @@ void Init_Opengl(void)
 void Init_Window(int argc, char* argv[])
 {
     glutInit(&argc, argv);
-	
-	glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA);
+	glutInitDisplayMode(GLUT_RGBA|GLUT_DOUBLE|GLUT_DEPTH);
+	//glutInitDisplayMode( GLUT_DOUBLE | GLUT_RGBA);
     glutInitContextVersion(3,3);
     glutInitContextFlags(GLUT_FORWARD_COMPATIBLE);
     glutInitContextProfile(GLUT_CORE_PROFILE);
