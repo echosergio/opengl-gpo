@@ -33,7 +33,7 @@ out vec3 color;
 uniform sampler2D tex;
 void main()
 {
- color=vec3(1.0f,0.0f,0.0f);
+ color = texture(tex,UV).rgb;
 }
 );
 
@@ -55,10 +55,12 @@ objeto crear_cuadrado(void)
   // Just one square = 2 triangles = 4 vertex
   
 static const GLfloat vertex_data[] = {
-     0.0f,-1.0f,1.0f,    0.0f,0.0f, //0
-	 0.0f,1.0f,1.0f,     0.0f,0.0f, //1
-	 0.0f,1.0f,-1.0f,    0.0f,0.0f, //2
+     0.0f,-1.0f,1.0f,    0.0f,1.0f, //0
+	 0.0f,1.0f,1.0f,     1.0f,1.0f, //1
+	 0.0f,1.0f,-1.0f,    1.0f,0.0f, //2
 	 0.0f,-1.0f,-1.0f,   0.0f,0.0f}; //3
+
+
 
     GLbyte indices[]={ 0,1,2, 0,2,3}; 
 	obj.Ni=2*3;
@@ -121,7 +123,7 @@ void init_scene()
   // Carga imagen de bmp, crea objeto textura tex0, 
   // ajusta propiedades y lo asocia a texture slot 0 (GL_TEXTURE0)
   tex0=cargar_textura_from_bmp("foto0.bmp",GL_TEXTURE0);  
-
+  tex1=cargar_textura_from_bmp("foto1.bmp",GL_TEXTURE1); 
 }
 
 
@@ -149,7 +151,15 @@ void render_scene()
 	mat4 V = lookAt(pos_obs, target,  vec3(0,0,1) );  // Pos camara, Lookat, head up
 	mat4 M,T,R,S;
 
-	M = mat4(1.0f);
+	// Translación en el plano XY de radio 2
+	T = translate(2 * sin(tt), 2 * cos(tt), 0.0f);
+
+	// Escalado
+	S = glm::scale(0.5f, 0.5f, 0.8f);
+
+	// Rotacion 60º/segundos en el vector (0,0,1)
+	R = glm::rotate(60.0f * tt, vec3(0, 0, 1));
+	M = R;
 
 	transfer_mat4("MVP",P*V*M); transfer_int("tex",0);
     dibujar_indexado(obj);
