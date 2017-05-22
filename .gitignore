@@ -43,3 +43,5 @@ glsdk/freeglut/config.status
 glsdk/freeglut/libtool
 glsdk/freeglut/stamp-h1
 
+*.zip
+
