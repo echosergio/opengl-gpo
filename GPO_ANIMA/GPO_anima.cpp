@@ -8,6 +8,7 @@ ATG, 2016
 char* WINDOW_TITLE="Animacion en OpenGL (GpO)";
 int CurrentWidth = 600,   CurrentHeight = 450,  fig1 = 0;  // Tama�o ventana, handle a ventana
 unsigned FrameCount = 0;
+float FRAGMENT_WIDTH = 0.5;
 
 
 ///////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -22,10 +23,15 @@ layout(location = 1) in vec3 color;
 out vec3 col;
 //out vec4 gl_Position;
 uniform mat4 MVP1=mat4(1.0f);
+uniform mat4 MVP2=mat4(1.0f);
+uniform float WIDTH = 0.5;
 void main()
  {
   vec4 pos1 =  MVP1*vec4(pos, 1);
-  gl_Position = pos1;
+  vec4 pos2 =  MVP2*vec4(pos, 1);
+  //gl_Position = (pos.z >= -2) ? pos1 : pos2;
+  float t = smoothstep(-2.0f-WIDTH,-2.0f+WIDTH,pos.z);
+  gl_Position = mix(pos1,pos2,t);
   col=color;                 // Paso color a fragment shader
  }
 );
@@ -104,11 +110,28 @@ void render_scene()
 	pos_obs = vec3(8.0f*sin(az), 8.0f*cos(az), 2.0f);
 	mat4 P = perspective(40.0f, 4.0f / 3.0f, 0.1f, 20.0f);  //40� Y-FOV,  4:3 ,  Znear=0.1, Zfar=20
 	mat4 V = lookAt(pos_obs, target,  vec3(0,0,1) );  // Pos camara, Lookat, head up
+	mat4 M, T, S, R, R2;
+	// Translación en el plano XY de radio 2
+	T = translate(2 * sin(tt), 2 * cos(tt), 0.0f);
 
-	mat4 M= mat4(1.0f); // Matriz identidad
-	
+	// Escalado
+	//S = glm::scale(escalado, escalado, escalado);
+
+	// Rotacion 60º/segundos en el vector (0,0,1)
+	R = glm::rotate(60.0f * tt, vec3(0, 0, 1));
+
+	M = T * R;
+
 	transfer_mat4("MVP1",P*V*M);  
+	R2 = glm::rotate(40.0f*(1.0f-cos(2.0f*tt)), vec3(0,1,0));
 
+	vec3 p_tmp = vec3(0,0,-2);
+	vec4 p = vec4(p_tmp,1);
+	vec3 Mp = vec3(M*p);
+	mat4 M2 = translate(Mp) * R2 * translate(-Mp) * M;
+
+	transfer_mat4("MVP2",P*V*M2);
+	
     dibujar_indexado(cilindro);
 
 	////////////////////////////////////////////////////////
@@ -156,10 +179,22 @@ void key_special(int key, int x, int y)
 	  case GLUT_KEY_F1:  // Teclas de Funcion
 	    break;
 	  case GLUT_KEY_UP:  //Teclas cursor;  
-       
+        if (FRAGMENT_WIDTH > 1.99f){
+			printf("====================== REACHED MAX WIDTH: %.2f\n", FRAGMENT_WIDTH);
+			return;
+		}
+		FRAGMENT_WIDTH += 0.01;
+		transfer_float("WIDTH", FRAGMENT_WIDTH);
+		printf("======================WIDTH: %.2f\n", FRAGMENT_WIDTH);
 		break;         
 	  case GLUT_KEY_DOWN:
-
+	  	if (FRAGMENT_WIDTH < 0.02f){
+			printf("====================== REACHED MIN WIDTH: %.2f\n", FRAGMENT_WIDTH);
+			return;
+		}
+		FRAGMENT_WIDTH -= 0.01;
+		transfer_float("WIDTH", FRAGMENT_WIDTH);
+		printf("======================WIDTH: %.2f\n", FRAGMENT_WIDTH);
          break;
 	  case GLUT_KEY_LEFT:
 		  az += 0.05;
