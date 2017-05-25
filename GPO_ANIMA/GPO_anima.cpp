@@ -1,11 +1,12 @@
 /************************  GPO           ************************************
 ATG, 2016
 ******************************************************************************/
-#include "GpO.h"
+//#include "GpO.h"
+#include "../cross-cutting/GpO.h"
 
 
 char* WINDOW_TITLE="Animacion en OpenGL (GpO)";
-int CurrentWidth = 600,   CurrentHeight = 450,  fig1 = 0;  // Tamaño ventana, handle a ventana
+int CurrentWidth = 600,   CurrentHeight = 450,  fig1 = 0;  // Tamaï¿½o ventana, handle a ventana
 unsigned FrameCount = 0;
 
 
@@ -65,8 +66,8 @@ void dibujar_indexado(objeto obj)
 
 
 
-// Compilación programas a ejecutar en la tarjeta gráfica:  vertex shader, fragment shaders
-// Preparación de los datos de los objetos a dibujar, envialarlos a la GPU
+// Compilaciï¿½n programas a ejecutar en la tarjeta grï¿½fica:  vertex shader, fragment shaders
+// Preparaciï¿½n de los datos de los objetos a dibujar, envialarlos a la GPU
 // Opciones generales de render de OpenGL
 void init_scene()  
 {
@@ -87,7 +88,7 @@ vec3 target = vec3(0.0f,0.0f,-2.0f);
 
 
 // Dibujar objetos 
-// Actualizar escena: cambiar posición objetos, nuevos objetros, posición cámara, luces, etc.
+// Actualizar escena: cambiar posiciï¿½n objetos, nuevos objetros, posiciï¿½n cï¿½mara, luces, etc.
 void render_scene()
 {
 	FrameCount++;
@@ -97,11 +98,11 @@ void render_scene()
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
 
-	///////// Aqui vendría nuestr código para actualizar escena  /////////	
+	///////// Aqui vendrï¿½a nuestr cï¿½digo para actualizar escena  /////////	
     glUseProgram(prog);    // Indicamos que programa vamos a usar 
 
 	pos_obs = vec3(8.0f*sin(az), 8.0f*cos(az), 2.0f);
-	mat4 P = perspective(40.0f, 4.0f / 3.0f, 0.1f, 20.0f);  //40º Y-FOV,  4:3 ,  Znear=0.1, Zfar=20
+	mat4 P = perspective(40.0f, 4.0f / 3.0f, 0.1f, 20.0f);  //40ï¿½ Y-FOV,  4:3 ,  Znear=0.1, Zfar=20
 	mat4 V = lookAt(pos_obs, target,  vec3(0,0,1) );  // Pos camara, Lookat, head up
 
 	mat4 M= mat4(1.0f); // Matriz identidad
@@ -129,10 +130,10 @@ void mouse_mov(int,int);
 void eventos_teclado_mouse()
 {
 	glutKeyboardFunc(keyboard);      // Caso de pulsar alguna tecla
-	glutSpecialFunc(key_special);  // Teclas de función, cursores, etc
+	glutSpecialFunc(key_special);  // Teclas de funciï¿½n, cursores, etc
 
-//	glutMouseFunc(mouse);           // Eventos del ratón
-//	glutPassiveMotionFunc(mouse_mov); // Mov del raón
+//	glutMouseFunc(mouse);           // Eventos del ratï¿½n
+//	glutPassiveMotionFunc(mouse_mov); // Mov del raï¿½n
 }
 
 
@@ -195,7 +196,7 @@ void clean_up(void);
 int main(int argc, char* argv[])
 {
  Init_Window(argc, argv);  // Prepara y abre ventana
- Init_Opengl();            // Inicializa OpenGL, comprueba versión.
+ Init_Opengl();            // Inicializa OpenGL, comprueba versiï¿½n.
  init_scene();             // Preppara escena
  glutMainLoop();           // Entra en bucle (render_scene se ejecuta constantemente)
  exit(EXIT_SUCCESS);
@@ -244,7 +245,7 @@ void Init_Window(int argc, char* argv[])
 
 	// Asociar funciones de eventos
 	glutDisplayFunc(render_scene);   //render, llamada de forma continua en el bucle
-	glutReshapeFunc(cambia_window); // Caso de cambiar tamaño de ventana
+	glutReshapeFunc(cambia_window); // Caso de cambiar tamaï¿½o de ventana
     glutIdleFunc(IdleFunction);
     glutTimerFunc(200, TimerFunction, 0);
 	glutCloseFunc(clean_up);
