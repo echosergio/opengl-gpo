@@ -21,12 +21,22 @@ const char *vertex_prog = GLSL(
 	
 	uniform mat4 MVP1 = mat4(1.0f);
 	uniform mat4 MVP2 = mat4(1.0f);
+	uniform mat4 MVP3 = mat4(1.0f);
 	uniform float WIDTH = 0.5;
 
 	void main() {
 		vec4 pos1 = MVP1 * vec4(pos, 1);
 		vec4 pos2 = MVP2 * vec4(pos, 1);
-		gl_Position = (pos.z >= 0.48) ? pos1 : pos2;
+		vec4 pos3 = MVP3 * vec4(pos, 1);
+
+		if (pos.z <= -0.48) {
+			gl_Position = pos1;
+		} else if (pos.z >= 0.48) {
+			gl_Position = pos2;
+		} else {
+			gl_Position = pos3;
+		}
+
 		col = color; // Paso color a fragment shader
 	});
 
@@ -86,22 +96,31 @@ void render_scene()
 
 	mat4 P = perspective(40.0f, 4.0f / 3.0f, 0.1f, 20.0f); //40� Y-FOV,  4:3 ,  Znear=0.1, Zfar=20
 	mat4 V = lookAt(pos_obs, target, vec3(0, 1, 0));	   // Pos camara, Lookat, head up
-	mat4 M, T, R, S, R2;
+	mat4 M, T, R, S, R2, R3;
 
 	R = glm::rotate(30.0f * tt, vec3(0, 1, 0));
 	M = R;
 
-	transfer_mat4("MVP2", P * V * M);
+	transfer_mat4("MVP3", P * V * M);
 	transfer_int("tex", 0);
 
 	R2 = glm::rotate(45.0f * (1.0f - cos(3.0f * tt)), vec3(0, 1, 0));
 
-	vec3 p_tmp = vec3(0, 1.15, 0.48);
+	vec3 p_tmp = vec3(0, 1.45, 0.48);
 	vec4 p = vec4(p_tmp, 1);
 	vec3 Mp = vec3(M * p);
 	mat4 M2 = translate(Mp) * R2 * translate(-Mp) * M;
 
-	transfer_mat4("MVP1", P * V * M2);
+	transfer_mat4("MVP2", P * V * M2);
+
+	R3 = glm::rotate(-45.0f * (1.0f - cos(3.0f * tt)), vec3(0, 1, 0));
+
+	p_tmp = vec3(0, 1.45, -0.48);
+	p = vec4(p_tmp, 1);
+	Mp = vec3(M * p);
+	mat4 M3 = translate(Mp) * R3 * translate(-Mp) * M;
+
+	transfer_mat4("MVP1", P * V * M3);
 
 	dibujar_indexado(obj);
 
