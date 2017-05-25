@@ -28,8 +28,14 @@ const char *fragment_prog = GLSL(
 	in vec2 UV;
 	out vec3 color;
 	uniform sampler2D tex;
+	uniform sampler2D tex2;
 	void main() {
-		color = texture(tex, UV).rgb;
+		vec3 col1;
+		vec3 col2;
+		col1 = texture(tex,UV).rgb;
+		col2 = texture(tex2,UV).rgb;
+		color=mix(col1,col2,smoothstep(150,300,gl_FragCoord.y));
+
 	});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -100,7 +106,7 @@ void dibujar_indexado(objeto obj)
 // Opciones generales de render de OpenGL
 void init_scene()
 {
-	GLuint tex0, tex1, tex2, tex3;
+	GLuint tex0, tex1;
 
 	prog = LinkShaders(vertex_prog, fragment_prog); // Compile shaders, crear programa a usar, Mandar a GPU
 	glUseProgram(prog);								// Indicamos que programa vamos a usar
@@ -110,11 +116,10 @@ void init_scene()
 	// Carga imagen de bmp, crea objeto textura tex0,
 	// ajusta propiedades y lo asocia a texture slot 0 (GL_TEXTURE0)
 	tex0 = cargar_textura_from_bmp("tierra.bmp", GL_TEXTURE0);
-	tex1 = cargar_textura_from_bmp("luna.bmp", GL_TEXTURE1);
-	tex2 = cargar_textura_from_bmp("marte.bmp", GL_TEXTURE2);
-	tex3 = cargar_textura_from_bmp("Jupiter.bmp", GL_TEXTURE3);
-
+	tex1 = cargar_textura_from_bmp("Jupiter.bmp", GL_TEXTURE1);
 	transfer_int("tex", 0);
+	transfer_int("tex2", 1);
+
 }
 
 vec3 pos_obs = vec3(3.0f, 0.0f, 0.0f);
@@ -149,7 +154,8 @@ void render_scene()
 	M = S * R;
 
 	transfer_mat4("MVP", P * V * M);
-	//transfer_int("tex");
+	transfer_int("tex", 0);
+	transfer_int("tex2", 1);
 
 	dibujar_indexado(obj);
 
