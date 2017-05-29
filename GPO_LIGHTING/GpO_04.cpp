@@ -106,6 +106,7 @@ vec3 campos = vec3(0.0f, 0.0f, 4.0f);
 vec3 target = vec3(0.0f, 0.0f, 0.0f);
 
 objeto modelo;
+bool prog_switch = true;
 
 // Compilaci�n programas a ejecutar en la tarjeta gr�fica:  vertex shader, fragment shaders
 // Preparaci�n de los datos de los objetos a dibujar, envialarlos a la GPU
@@ -114,9 +115,10 @@ void init_scene()
 {
 	prog1 = LinkShaders(vertex_prog1, fragment_prog1); // Compile shaders prog1
 	prog2 = LinkShaders(vertex_prog2, fragment_prog2); // Compile shaders prog2
+	
 	glUseProgram(prog1);
 
-	modelo = cargar_modelo("esfera_277_n.bix");
+	modelo = cargar_modelo("esfera_520_n.bix");
 
 	Proy = glm::perspective(55.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(campos, target, glm::vec3(0, 1, 0));
@@ -131,6 +133,9 @@ void init_scene()
 void render_scene()
 {
 	FrameCount++;
+
+	prog_switch ? glUseProgram(prog1) : glUseProgram(prog2);
+
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -163,7 +168,7 @@ void mouse_mov(int, int);
 void eventos_teclado_mouse()
 {
 	glutKeyboardFunc(keyboard); // Caso de pulsar alguna tecla
-	//	glutSpecialFunc(key_special);  // Teclas de funci�n, cursores, etc
+	glutSpecialFunc(key_special);  // Teclas de funci�n, cursores, etc
 
 	//	glutMouseFunc(mouse);           // Eventos del rat�n
 	//	glutMotionFunc(mouse_mov); // Mov del ra�n
@@ -185,6 +190,7 @@ void key_special(int key, int x, int y)
 	switch (key)
 	{
 	case GLUT_KEY_F1: // Teclas de Funcion
+		prog_switch = !prog_switch;
 		break;
 	case GLUT_KEY_UP: //Teclas cursor;
 		break;
