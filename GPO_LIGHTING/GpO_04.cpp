@@ -47,36 +47,33 @@ const char *fragment_prog1 = GLSL(
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
-
 const char *vertex_prog2 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
 	layout(location = 1) in vec3 normal;
-	out vec3 ilu;
+	out vec3 normal_T;
 
 	uniform mat4 MVP;
 	uniform mat4 M_normales;
 
-	const vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
-	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
-
 	void main() {
-		float difusa;
-		vec3 normal_T;
 
 		gl_Position = MVP * vec4(pos, 1);
 
 		normal_T = (M_normales * vec4(normal, 0.0f)).xyz; // Modificamos normales por el mov del objeto
 		normal_T = normalize(normal_T);					  // Aseguramos de que vectoror normal sea de longitud 1
-
-		difusa = clamp(dot(lightdir, normal_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
-
-		ilu = 0.15 + 0.85 * difusa * lightcolor; //Ambiente + difusa
 	});
 
 const char *fragment_prog2 = GLSL(
-	in vec3 ilu; // Entrada = colores de vertices (interpolados en fragmentos)
+	in vec3 normal_T; // Entrada = colores de vertices (interpolados en fragmentos)
 	out vec3 color_fragmento;
+	const vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
+	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
 	void main() {
+		float difusa;
+		vec3 ilu;
+		difusa = clamp(dot(lightdir, normal_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
+
+		ilu = 0.15 + 0.85 * difusa * lightcolor; //Ambiente + difusa
 		color_fragmento = ilu;
 	});
 
@@ -118,7 +115,7 @@ void init_scene()
 	
 	glUseProgram(prog1);
 
-	modelo = cargar_modelo("esfera_520_n.bix");
+	modelo = cargar_modelo("esfera_106_n.bix");
 
 	Proy = glm::perspective(55.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(campos, target, glm::vec3(0, 1, 0));
