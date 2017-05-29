@@ -14,6 +14,9 @@ unsigned FrameCount = 0;
 
 #define GLSL(src) "#version 330 core\n" #src
 
+float az = 0.0f;
+float elev = 3.14/4;
+
 const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
 	layout(location = 1) in vec3 normal;
@@ -22,7 +25,7 @@ const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 	uniform mat4 MVP;
 	uniform mat4 M_normales;
 
-	const vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
+	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
 	const vec3 lightcolor = vec3(1.0f, 1.0f, 1.0f);
 
 	void main() {
@@ -66,7 +69,7 @@ const char *vertex_prog2 = GLSL( // GOURAD, LUZ LEJANA
 const char *fragment_prog2 = GLSL(
 	in vec3 normal_T; // Entrada = colores de vertices (interpolados en fragmentos)
 	out vec3 color_fragmento;
-	const vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
+	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
 	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
 	void main() {
 		float difusa;
@@ -133,6 +136,9 @@ void render_scene()
 
 	prog_switch ? glUseProgram(prog1) : glUseProgram(prog2);
 
+	vec3 dirlight = vec3(cos(elev)*cos(az), sin(elev), cos(elev)*sin(az));
+	transfer_vec3("lightdir", dirlight);
+
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -190,12 +196,16 @@ void key_special(int key, int x, int y)
 		prog_switch = !prog_switch;
 		break;
 	case GLUT_KEY_UP: //Teclas cursor;
+		elev += 0.02;
 		break;
 	case GLUT_KEY_DOWN:
+		elev -= 0.02;
 		break;
 	case GLUT_KEY_LEFT:
+		az -= 0.02;
 		break;
 	case GLUT_KEY_RIGHT:
+		az += 0.02;
 		break;
 	}
 }
