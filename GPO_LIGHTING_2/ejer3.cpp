@@ -16,7 +16,7 @@ unsigned FrameCount = 0;
 
 float az = 0.0f;
 float elev = 3.14/4;
-vec4 coeff = vec4(0.3f, 0.0f, 1.0f, 80.0f);
+vec4 coeff = vec4(0.1, 0.6, 0.3, 16);
 
 const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
@@ -58,7 +58,6 @@ const char *fragment_prog1 = GLSL(
 	void main() {
 		color_fragmento = ilu;
 	});
-
 
 //////////////////////////////////////////////////////////////////////////////////
 
@@ -184,7 +183,7 @@ void render_scene()
 
 	adjunta_M = glm::transpose(inverse(M));
 	transfer_mat4("M_normales", adjunta_M);
-    transfer_vec4("coeff", coeff);
+
 	dibujar_indexado(modelo);
 	glutSwapBuffers();
 }
@@ -206,6 +205,7 @@ void eventos_teclado_mouse()
 	//	glutMouseFunc(mouse);           // Eventos del rat�n
 	//	glutMotionFunc(mouse_mov); // Mov del ra�n
 }
+
 
 void keyboard(unsigned char key, int x, int y)
 {
