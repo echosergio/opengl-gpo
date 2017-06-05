@@ -16,6 +16,7 @@ unsigned FrameCount = 0;
 
 float az = 0.0f;
 float elev = 3.14/4;
+vec4 coeff = vec4(0.3f, 0.0f, 1.0f, 80.0f);
 
 const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
@@ -70,7 +71,6 @@ const char *vertex_prog2 = GLSL( // GOURAD, LUZ LEJANA
 	uniform mat4 M_normales;
 	uniform mat4 M;
 
-	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
 	const vec3 lightcolor = vec3(1.0f, 1.0f, 1.0f);
 	uniform vec3 campos = vec3(1.0f, 1.0f, 1.0f);
 
@@ -88,6 +88,7 @@ const char *fragment_prog2 = GLSL(
 	in vec3 v;
 	out vec3 color_fragmento;
 	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
+    uniform vec4 coeff;
 	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
 	void main() {
 		float comp_esp;
@@ -100,9 +101,9 @@ const char *fragment_prog2 = GLSL(
 		v2 = normalize(v);
 
 		r = reflect(-lightdir, n_T);
-		comp_esp = pow(clamp(dot(r,v2),0.0f,1.0f), 16.0f);
+		comp_esp = pow(clamp(dot(r,v2),0.0f,1.0f), coeff[4]);
 		difusa = clamp(dot(lightdir, n_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
-		color_fragmento = 0.10f + 0.60f * difusa * lightcolor + 0.30f * comp_esp; //Ambiente + difusa + especular;
+		color_fragmento = coeff[0] + coeff[1] * difusa * lightcolor + coeff[2] * comp_esp; //Ambiente + difusa + especular;
 	});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -205,6 +206,7 @@ void eventos_teclado_mouse()
 	//	glutMotionFunc(mouse_mov); // Mov del ra�n
 }
 
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -213,6 +215,41 @@ void keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // Salimos del bucle
 		return;
 		break;
+    // Subir valores
+    case 'q':
+        coeff += vec4(0.05,0.0,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'w':
+        coeff += vec4(0.0,0.05,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'e':
+        coeff += vec4(0.0,0.0,0.05,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'r':
+        coeff += vec4(0.0,0.0,0.0,0.05);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+
+    // Bajar valores
+    case 'a':
+        coeff -= vec4(0.05,0.0,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 's':
+        coeff -= vec4(0.0,0.05,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'd':
+        coeff -= vec4(0.0,0.0,0.05,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'f':
+        coeff -= vec4(0.0,0.0,0.0,0.05);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;      
 	}
 }
 
