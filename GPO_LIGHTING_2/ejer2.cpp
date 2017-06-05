@@ -104,35 +104,6 @@ const char *fragment_prog2 = GLSL(
 		difusa = clamp(dot(lightdir, n_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
 		color_fragmento = 0.10f + 0.60f * difusa * lightcolor + 0.30f * comp_esp; //Ambiente + difusa + especular;
 	});
-const char *vertex_prog2B = GLSL( // GOURAD, LUZ LEJANA
-	layout(location = 0) in vec3 pos;
-	layout(location = 1) in vec3 normal;
-	out vec3 normal_T;
-
-	uniform mat4 MVP;
-	uniform mat4 M_normales;
-
-	void main() {
-
-		gl_Position = MVP * vec4(pos, 1);
-
-		normal_T = (M_normales * vec4(normal, 0.0f)).xyz; // Modificamos normales por el mov del objeto
-		normal_T = normalize(normal_T);					  // Aseguramos de que vectoror normal sea de longitud 1
-	});
-
-const char *fragment_prog2B = GLSL(
-	in vec3 normal_T; // Entrada = colores de vertices (interpolados en fragmentos)
-	out vec3 color_fragmento;
-	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
-	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
-	void main() {
-		float difusa;
-		vec3 ilu;
-		difusa = clamp(dot(lightdir, normal_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
-
-		ilu = 0.15 + 0.85 * difusa * lightcolor; //Ambiente + difusa
-		color_fragmento = ilu;
-	});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
 /////////////////////   RENDER CODE AND DATA
