@@ -16,6 +16,7 @@ unsigned FrameCount = 0;
 
 float az = 0.0f;
 float elev = 3.14/4;
+vec4 coeff = vec4(0.1, 0.6, 0.3, 16);
 
 const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
@@ -24,23 +25,32 @@ const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
 
 	uniform mat4 MVP;
 	uniform mat4 M_normales;
+	uniform mat4 M;
 
 	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
 	const vec3 lightcolor = vec3(1.0f, 1.0f, 1.0f);
+	uniform vec3 campos = vec3(1.0f, 1.0f, 1.0f);
 
 	void main() {
 		float difusa;
+		float comp_esp;
 		vec3 normal_T;
+		vec3 v;
+		vec3 r;
 
 		gl_Position = MVP * vec4(pos, 1);
 
 		normal_T = (M_normales * vec4(normal, 0.0f)).xyz; // Modificamos normales por el mov del objeto
 		normal_T = normalize(normal_T);					  // Aseguramos de que vectoror normal sea de longitud 1
 
+		v = normalize( campos - (M * vec4(pos,1)).xyz );
+		r = reflect(-lightdir, normal_T);
+		comp_esp = pow(clamp(dot(r,v),0.0f,1.0f), 16.0f);
 		difusa = clamp(dot(lightdir, normal_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
 
-		ilu = 0.15 + 0.85 * difusa * lightcolor; //Ambiente + difusa
+		ilu = 0.10f + 0.60f * difusa * lightcolor + 0.30f * comp_esp; //Ambiente + difusa + especular
 	});
+
 
 const char *fragment_prog1 = GLSL(
 	in vec3 ilu; // Entrada = colores de vertices (interpolados en fragmentos)
@@ -50,41 +60,50 @@ const char *fragment_prog1 = GLSL(
 	});
 
 //////////////////////////////////////////////////////////////////////////////////
+
 const char *vertex_prog2 = GLSL( // GOURAD, LUZ LEJANA
 	layout(location = 0) in vec3 pos;
-	layout(location = 1) in vec2 uv;
-	layout(location = 2) in vec3 normal;
+	layout(location = 1) in vec3 normal;
+	out vec3 v;
 	out vec3 normal_T;
-	out vec2 UV;
 
 	uniform mat4 MVP;
 	uniform mat4 M_normales;
+	uniform mat4 M;
+
+	const vec3 lightcolor = vec3(1.0f, 1.0f, 1.0f);
+	uniform vec3 campos = vec3(1.0f, 1.0f, 1.0f);
 
 	void main() {
-
 		gl_Position = MVP * vec4(pos, 1);
-		UV = uv;
+
 		normal_T = (M_normales * vec4(normal, 0.0f)).xyz; // Modificamos normales por el mov del objeto
+						  // Aseguramos de que vectoror normal sea de longitud 1
+
+		v = campos - (M * vec4(pos,1)).xyz;
 	});
 
 const char *fragment_prog2 = GLSL(
 	in vec3 normal_T; // Entrada = colores de vertices (interpolados en fragmentos)
-	in vec2 UV;
+	in vec3 v;
 	out vec3 color_fragmento;
 	uniform vec3 lightdir = vec3(1 / sqrt(2.0f), 1 / sqrt(2.0f), 0.0f);
-	const vec3 lightcolor = vec3(1.0f, 1.0f, 1.0f);
-
-	uniform sampler2D tex;
-	
+    uniform vec4 coeff;
+	const vec3 lightcolor = vec3(1.0f, 0.8f, 1.0f);
 	void main() {
+		float comp_esp;
 		float difusa;
-		vec3 ilu;
+		vec3 r;
+		vec3 n_T;
+		vec3 v2;
 
-		vec3 n =  normalize(normal_T);
-		difusa = clamp(dot(lightdir, n), 0.0f, 1.0f); // producto escalar entre vector luz y normal
+		n_T = normalize(normal_T);	
+		v2 = normalize(v);
 
-		ilu = 0.15 + 0.85 * difusa * lightcolor; //Ambiente + difusa
-		color_fragmento = ilu * texture(tex, UV).rgb;
+		r = reflect(-lightdir, n_T);
+		comp_esp = pow(clamp(dot(r,v2),0.0f,1.0f), coeff[4]);
+		difusa = clamp(dot(lightdir, n_T), 0.0f, 1.0f); // producto escalar entre vector luz y normal
+		color_fragmento = coeff[0] + coeff[1] * difusa * lightcolor + coeff[2] * comp_esp; //Ambiente + difusa + especular;
 	});
 
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -109,8 +128,8 @@ void dibujar_indexado(objeto obj)
 
 // Variables globales
 glm::mat4 Proy, View, M, MVP;
-vec3 campos = vec3(0.0f, 1.0f, 2.0f);
-vec3 target = vec3(0.0f, 1.0f, 0.0f);
+vec3 campos = vec3(0.0f, 0.0f, 4.0f);
+vec3 target = vec3(0.0f, 0.0f, 0.0f);
 
 objeto modelo;
 bool prog_switch = true;
@@ -120,15 +139,12 @@ bool prog_switch = true;
 // Opciones generales de render de OpenGL
 void init_scene()
 {
-	GLuint tex0;
-
 	prog1 = LinkShaders(vertex_prog1, fragment_prog1); // Compile shaders prog1
 	prog2 = LinkShaders(vertex_prog2, fragment_prog2); // Compile shaders prog2
 	
-	glUseProgram(prog2);
+	glUseProgram(prog1);
 
-	modelo = cargar_modelo("halo_tn.bix");
-	tex0 = cargar_textura_from_bmp("halo.bmp", GL_TEXTURE0);
+	modelo = cargar_modelo("esfera_520_n.bix");
 
 	Proy = glm::perspective(55.0f, 4.0f / 3.0f, 0.1f, 100.0f);
 	View = glm::lookAt(campos, target, glm::vec3(0, 1, 0));
@@ -144,12 +160,10 @@ void render_scene()
 {
 	FrameCount++;
 
-	// prog_switch ? glUseProgram(prog1) : glUseProgram(prog2);
-	glUseProgram(prog2);
+	prog_switch ? glUseProgram(prog1) : glUseProgram(prog2);
 
 	vec3 dirlight = vec3(cos(elev)*cos(az), sin(elev), cos(elev)*sin(az));
 	transfer_vec3("lightdir", dirlight);
-	transfer_int("tex", 0);
 
 	glClearColor(0.0f, 0.0f, 0.4f, 0.0f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -159,10 +173,13 @@ void render_scene()
 	glm::mat4 adjunta_M;
 
 	glm::vec3 t = vec3(cos(tt), 0.0f, sin(tt));
-	M = rotate(20 * tt, vec3(0.0f, 1.0f, 0.0f)); //Rotate model
+	M = translate(t) * rotate(50 * tt, vec3(0.0f, 1.0f, 0.0f)); //Rotate model
 	MVP = Proy * View * M;
 
 	transfer_mat4("MVP", MVP);
+
+	transfer_mat4("M", M);
+	transfer_vec3("campos", campos);
 
 	adjunta_M = glm::transpose(inverse(M));
 	transfer_mat4("M_normales", adjunta_M);
@@ -189,6 +206,7 @@ void eventos_teclado_mouse()
 	//	glutMotionFunc(mouse_mov); // Mov del ra�n
 }
 
+
 void keyboard(unsigned char key, int x, int y)
 {
 	switch (key)
@@ -197,6 +215,41 @@ void keyboard(unsigned char key, int x, int y)
 		glutLeaveMainLoop(); // Salimos del bucle
 		return;
 		break;
+    // Subir valores
+    case 'q':
+        coeff += vec4(0.05,0.0,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'w':
+        coeff += vec4(0.0,0.05,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'e':
+        coeff += vec4(0.0,0.0,0.05,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'r':
+        coeff += vec4(0.0,0.0,0.0,0.05);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+
+    // Bajar valores
+    case 'a':
+        coeff -= vec4(0.05,0.0,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 's':
+        coeff -= vec4(0.0,0.05,0.0,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'd':
+        coeff -= vec4(0.0,0.0,0.05,0.0);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;
+    case 'f':
+        coeff -= vec4(0.0,0.0,0.0,0.05);
+        printf("*******( %.2f, %.2f, %.2f, %.2f ) ********\n", coeff[0], coeff[1], coeff[2], coeff[3]);
+        break;      
 	}
 }
 

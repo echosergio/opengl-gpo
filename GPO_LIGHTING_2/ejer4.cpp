@@ -1,7 +1,8 @@
 /************************  GPO_03 ************************************
 ATG, 2014
 ******************************************************************************/
-#include "GpO.h"
+//#include "GpO.h"
+#include "../cross-cutting/GpO.h"
 
 char *WINDOW_TITLE = "ILUMINACION en OpenGL (GpO)";
 int CurrentWidth = 600, CurrentHeight = 450, WindowHandle = 0; // Tama�o ventana, handle a ventana
@@ -13,7 +14,7 @@ unsigned FrameCount = 0;
 
 #define GLSL(src) "#version 330 core\n" #src
 
-float az = 0.0f;
+float az = 45.0f;
 float elev = 3.14/4;
 
 const char *vertex_prog1 = GLSL( // GOURAD, LUZ LEJANA
