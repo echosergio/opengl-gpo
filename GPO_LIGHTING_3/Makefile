@@ -4,7 +4,7 @@ LD_FLAGS = -L../glsdk/freeglut/lib -lfreeglutD -L../glsdk/glfw/library -lglfwD -
 INCLUDE_FLAGS = -I ../glsdk/glfw/include/ -I ../glsdk/glload/include/  -I ../glsdk/glm/
 
 EXEC = gpo.app
-SOURCES = GpO_tarea_ilu.cpp $(wildcard ../cross-cutting/*.cpp)
+SOURCES = GpO_tarea_ilu_B.cpp $(wildcard ../cross-cutting/*.cpp)
 OBJECTS = $(SOURCES:.cpp=.o)
 
 $(EXEC): $(OBJECTS)

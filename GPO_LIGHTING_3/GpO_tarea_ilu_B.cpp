@@ -23,25 +23,38 @@ out vec3 n_modif;
 
 uniform mat4 MVP;
 uniform mat4 M_adj;
+uniform mat4 M;
+
+out vec3 pos_escena;
 
 void main(){	
 	gl_Position =  MVP*vec4(pos,1);
 	n_modif = (M_adj*vec4(n,0.0)).xyz;
+	pos_escena = (M*vec4 (pos, 1)).xyz;
 }
 );
 
 const char* fragment_prog = GLSL(
 in vec3 n_modif;
 out vec3 color;
+in vec3 pos_escena;
 
-uniform vec3 L; // vector direcci�n luz
+uniform vec3 pos_light;
 const vec3 lightcolor=vec3(1.0f,1.0f,0.8f);  // Color luz
 
 void main()
 {
- vec3 n=normalize(n_modif);
- float ilu=0.1+0.9*clamp(dot(L,n),0,1); 
- color = ilu*lightcolor;
+	vec3 L;
+	float d;
+	vec3 aux = pos_light - pos_escena;
+
+	d = length (aux);
+	L = normalize (aux);
+	float I = 1 / (1 + 0.5 * pow (d, 2));
+
+	vec3 n=normalize(n_modif);
+	float ilu=0.1+0.9*clamp(dot(L,n),0,1); 
+	color = ilu*lightcolor;
 }
 );
 
@@ -142,6 +155,7 @@ void init_scene()
 
 }
 
+vec3 pos_light = vec3 (0.0f, 0.0f, 0.5f);
 
 void render_scene()
 {
@@ -151,14 +165,18 @@ void render_scene()
 
 	float tt = glutGet(GLUT_ELAPSED_TIME)/1000.0f;
 
+	mat4 R = rotate(20 * sin(tt), vec3(1,0,0)); 
+	M = R;
 
-	M      = glm::mat4(1.0f);
 	MVP        =  Projection * View * M; 
 	mat4 M_adj=transpose(inverse(M));
 
 
 	transfer_mat4("MVP",MVP);
 	transfer_mat4("M_adj",M_adj);
+	transfer_mat4("M", M);
+
+	transfer_vec3("pos_light", pos_light);
 
 	lightdir = vec3(cos(elev)*cos(az), cos(elev)*sin(az), sin(elev));
 	transfer_vec3("L", lightdir);
@@ -207,22 +225,25 @@ void key_special(int key, int x, int y)
   switch (key)
 	{
 	  case GLUT_KEY_F1:  // Teclas de Funcion
-       
 	    break;
 	  case GLUT_KEY_F2:  // Teclas de Funcion
 	    break;
 	  case GLUT_KEY_UP:  //Teclas cursor;  
-		  elev+=0.02f; break;         
+		  pos_light.z += 0.05f; 
+		  break;         
 	  case GLUT_KEY_DOWN:
-		  elev-=0.02f; break;
+		  pos_light.z -= 0.05f; 
+		  break;
 	  case GLUT_KEY_LEFT:
-		  az-=0.02f; break;
+		  pos_light.y -= 0.05f; 
+		  break;
       case GLUT_KEY_RIGHT:
-		    az+=0.02f; break;
+		  pos_light.y += 0.05f; 
+		  break;
 	}
   	
    printf("Az %.2f  El %.2f :: ",az*180/3.14,elev*180/3.14); 
-   printf("Pos L %.2f %.2f %.2f\n",lightdir.x,lightdir.y,lightdir.z);
+   printf("Pos L %.2f %.2f %.2f\n",pos_light.x,pos_light.y,pos_light.z);
    
 }
 
